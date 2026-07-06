@@ -10,7 +10,6 @@ import {
   FileUp,
   FolderOpen,
   FolderPlus,
-  GitFork,
   LayoutDashboard,
   Moon,
   Sun,
@@ -1040,13 +1039,8 @@ function buildPaletteActions(opts: {
       keywords: ['read', 'book', 'mode'],
       run: () => opts.setMode('reading'),
     },
-    {
-      id: 'mode-graph',
-      label: 'View: Graph',
-      icon: <GitFork size={14} />,
-      keywords: ['links', 'mode'],
-      run: () => opts.setMode('graph'),
-    },
+    // 'View: Graph' palette entry removed until GraphView is rebuilt properly
+    // (ring layout collapses on real vaults). Mode plumbing intentionally kept.
   ]
 
   if (opts.selectedPath) {

@@ -7,7 +7,6 @@ import {
   Code2,
   ExternalLink,
   FileCode2,
-  GitFork,
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
@@ -159,7 +158,9 @@ export function Workspace({
             <ModeButton mode="split" activeMode={mode} icon={<Code2 size={15} />} onModeChange={onModeChange} />
             <ModeButton mode="source" activeMode={mode} icon={<FileCode2 size={15} />} onModeChange={onModeChange} />
             <ModeButton mode="reading" activeMode={mode} icon={<BookOpen size={15} />} onModeChange={onModeChange} />
-            <ModeButton mode="graph" activeMode={mode} icon={<GitFork size={15} />} onModeChange={onModeChange} />
+            {/* Graph mode is hidden from the switcher until the view is built properly
+                (current ring layout collapses on real vaults). Reachable code kept:
+                GraphView renders if mode === 'graph' is ever set programmatically. */}
           </div>
 
           <button

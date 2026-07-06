@@ -1863,6 +1863,37 @@ textarea.settings-row-control {
   white-space: nowrap;
 }
 
+.compact-list li button {
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  margin: 0 -8px;
+  border: 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.compact-list li button:hover {
+  color: var(--heading);
+  background: var(--field);
+}
+
+.compact-list li button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .link-list {
   display: grid;
   gap: 4px;
