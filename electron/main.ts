@@ -19,6 +19,7 @@ import {
   updateDocument,
 } from '../core/vault-ops.js'
 import { writeMetadata } from '../core/metadata-writer.js'
+import { safeResolveVaultPath } from '../core/path-guards.js'
 import { readSettings, updateSettings, withRecentVault, writeSettings } from '../core/settings.js'
 import type {
   ActiveVaultState,
@@ -190,8 +191,29 @@ async function ensureDirectory(rootPath: string): Promise<void> {
   }
 }
 
+async function resolveDemoVaultSource(): Promise<string> {
+  // In development the demo vault sits next to the app source; in packaged
+  // builds it is bundled as an extra resource under resourcesPath. Prefer the
+  // app path (matches the renderer's loadFile resolution) and fall back to the
+  // packaged resources directory.
+  const candidates = [
+    path.join(app.getAppPath(), 'demo-vault'),
+    ...(process.resourcesPath ? [path.join(process.resourcesPath, 'demo-vault')] : []),
+  ]
+
+  for (const candidate of candidates) {
+    if (await pathExists(candidate)) {
+      return candidate
+    }
+  }
+
+  // Nothing found; return the primary candidate so ensureDirectory throws a
+  // clear, actionable error rather than a misleading cwd-relative path.
+  return candidates[0]
+}
+
 async function createDemoVaultCopy(): Promise<string> {
-  const source = path.join(process.cwd(), 'demo-vault')
+  const source = await resolveDemoVaultSource()
   await ensureDirectory(source)
 
   const documentsPath = app.getPath('documents')
@@ -430,7 +452,7 @@ ipcMain.handle(
 
 ipcMain.handle('vault:reveal-in-explorer', async (_event, relativePath: string): Promise<void> => {
   const root = requireVaultRoot()
-  const absolute = path.join(root, relativePath)
+  const absolute = safeResolveVaultPath(root, relativePath)
   if (!(await pathExists(absolute))) {
     return
   }
@@ -439,7 +461,7 @@ ipcMain.handle('vault:reveal-in-explorer', async (_event, relativePath: string):
 
 ipcMain.handle('vault:open-in-browser', async (_event, relativePath: string): Promise<void> => {
   const root = requireVaultRoot()
-  const absolute = path.join(root, relativePath)
+  const absolute = safeResolveVaultPath(root, relativePath)
   if (!(await pathExists(absolute))) {
     return
   }

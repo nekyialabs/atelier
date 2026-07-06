@@ -14,6 +14,7 @@ export function Inspector({
   collapsed,
   onSelect,
   onCopyPrompt,
+  onScrollToHeading,
 }: {
   index: VaultIndex
   selectedFile?: VaultFile
@@ -24,6 +25,7 @@ export function Inspector({
   collapsed: boolean
   onSelect: (path: string) => void
   onCopyPrompt: (kind: 'create' | 'revise') => void
+  onScrollToHeading: (index: number) => void
 }) {
   const [tab, setTab] = useState<InspectorTab>('info')
 
@@ -63,7 +65,11 @@ export function Inspector({
             {selectedFile?.metadata.description ? <p className="description">{selectedFile.metadata.description}</p> : null}
           </InfoSection>
           <InfoSection title="Headings">
-            <CompactList items={selectedFile?.headings ?? []} empty="No headings" />
+            <CompactList
+              items={selectedFile?.headings ?? []}
+              empty="No headings"
+              onSelectIndex={onScrollToHeading}
+            />
           </InfoSection>
         </div>
       ) : null}
@@ -124,19 +130,39 @@ function InfoSection({ title, children }: { title: string; children: ReactNode }
   )
 }
 
-function CompactList({ items, empty }: { items: string[]; empty: string }) {
+function CompactList({
+  items,
+  empty,
+  onSelectIndex,
+}: {
+  items: string[]
+  empty: string
+  onSelectIndex?: (index: number) => void
+}) {
   if (!items.length) {
     return <p className="empty-state">{empty}</p>
   }
 
   return (
     <ul className="compact-list">
-      {items.slice(0, 10).map((item) => (
-        <li key={item}>
-          <FileText size={13} />
-          <span>{item}</span>
-        </li>
-      ))}
+      {items.slice(0, 10).map((item, index) =>
+        onSelectIndex ? (
+          // key includes the index because heading text can repeat within a
+          // document; the index is also the position passed to the preview so
+          // it scrolls to the matching heading in document order.
+          <li key={`${index}-${item}`}>
+            <button type="button" onClick={() => onSelectIndex(index)}>
+              <FileText size={13} />
+              <span>{item}</span>
+            </button>
+          </li>
+        ) : (
+          <li key={`${index}-${item}`}>
+            <FileText size={13} />
+            <span>{item}</span>
+          </li>
+        ),
+      )}
     </ul>
   )
 }

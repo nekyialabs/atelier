@@ -43,6 +43,7 @@ export interface DuplicateFileResult {
 export interface DeleteFileResult {
   removedPath: string
   index: VaultIndex
+  permanentlyDeleted?: boolean
 }
 
 export interface CreateFolderResult {
@@ -503,24 +504,36 @@ export async function deleteFile(
 
   hooks.beforeRefresh?.(normalized)
 
+  const permanentDelete = async (): Promise<void> => {
+    if (stats.isDirectory()) {
+      await fs.rm(absolute, { recursive: true, force: true })
+    } else {
+      await fs.unlink(absolute)
+    }
+  }
+
+  // Tracks whether the item bypassed the system trash and was removed
+  // irreversibly. This is surfaced to callers so they can report honestly
+  // rather than claiming the item was recoverable from the trash.
+  let permanentlyDeleted = false
+
   if (hooks.trashItem) {
     try {
       await hooks.trashItem(absolute)
     } catch {
-      if (stats.isDirectory()) {
-        await fs.rm(absolute, { recursive: true, force: true })
-      } else {
-        await fs.unlink(absolute)
-      }
+      // System trash was unavailable (e.g. no desktop shell / platform
+      // limitation). Documented fall-through: still delete permanently, but
+      // record that this was not a recoverable trash operation.
+      await permanentDelete()
+      permanentlyDeleted = true
     }
-  } else if (stats.isDirectory()) {
-    await fs.rm(absolute, { recursive: true, force: true })
   } else {
-    await fs.unlink(absolute)
+    await permanentDelete()
+    permanentlyDeleted = true
   }
 
   const index = await createVaultIndex(vaultRoot)
-  return { removedPath: normalized, index }
+  return { removedPath: normalized, index, permanentlyDeleted }
 }
 
 export async function createFolder(

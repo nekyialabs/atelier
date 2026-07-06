@@ -63,9 +63,23 @@ export async function readVaultConfig(vaultRoot: string): Promise<VaultConfig> {
           }
         : {}),
     }
-  } catch {
+  } catch (error) {
+    // A missing config file is normal (vault has no config yet) → defaults.
+    // Parse or permission errors are surfaced to the console so the failure is
+    // not silently swallowed, but we still return defaults so the app can run.
+    if (!isEnoent(error)) {
+      console.error(`Failed to read vault config at ${configPath}:`, error)
+    }
     return {}
   }
+}
+
+function isEnoent(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as NodeJS.ErrnoException).code === 'ENOENT'
+  )
 }
 
 export async function listTemplates(vaultRoot: string): Promise<VaultTemplate[]> {
@@ -110,6 +124,13 @@ export async function readTemplateBody(
   templateName: string,
   format: 'html' | 'md',
 ): Promise<string | null> {
+  // Template names are used to build a filesystem path directly. Reject any
+  // name carrying path separators or parent-directory segments so a caller
+  // cannot escape the templates directory (e.g. '../../secret').
+  if (/[/\\]/.test(templateName) || templateName.includes('..')) {
+    return null
+  }
+
   const candidates =
     format === 'html'
       ? [`${templateName}.html`, `${templateName}.htm`]

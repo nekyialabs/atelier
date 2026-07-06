@@ -71,6 +71,12 @@
       "!**/*.{ts,tsx,map}"
     ],
     "asar": true,
+    "extraResources": [
+      {
+        "from": "demo-vault",
+        "to": "demo-vault"
+      }
+    ],
     "win": {
       "target": [
         {

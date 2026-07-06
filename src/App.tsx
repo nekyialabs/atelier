@@ -136,44 +136,6 @@ function App() {
   }, [settings?.theme])
 
   useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const data = event.data as
-        | { source?: string; type?: string; relativePath?: string; href?: string }
-        | null
-      if (!data || data.source !== 'atelier-preview') {
-        return
-      }
-
-      if (data.type === 'navigate' && typeof data.relativePath === 'string') {
-        const target = data.relativePath
-        const files = activeVault?.index.files ?? []
-        const exact = files.find((file) => file.relativePath === target)
-        if (exact) {
-          void loadFile(exact.relativePath)
-        } else {
-          const targetBase = target.split('/').pop() ?? target
-          const targetStem = targetBase.replace(/\.[^.]+$/, '').toLowerCase()
-          const byBasename = files.find((file) => {
-            const base = file.relativePath.split('/').pop() ?? file.relativePath
-            const stem = base.replace(/\.[^.]+$/, '').toLowerCase()
-            return stem === targetStem
-          })
-          if (byBasename) {
-            void loadFile(byBasename.relativePath)
-          } else {
-            setStatus(`Not in vault: ${target}`)
-          }
-        }
-      } else if (data.type === 'open-external' && typeof data.href === 'string') {
-        void window.atelier.openExternal(data.href)
-      }
-    }
-
-    window.addEventListener('message', handler)
-    return () => window.removeEventListener('message', handler)
-  }, [activeVault, loadFile])
-
-  useEffect(() => {
     let active = true
 
     window.atelier
@@ -468,7 +430,11 @@ function App() {
           setSavedContent('')
           setPreviewUrl('')
         }
-        setStatus(`Moved to trash: ${result.removedPath}`)
+        setStatus(
+          result.permanentlyDeleted
+            ? `Permanently deleted (system trash unavailable): ${result.removedPath}`
+            : `Moved to trash: ${result.removedPath}`,
+        )
       } catch (deleteError) {
         setError(deleteError instanceof Error ? deleteError.message : String(deleteError))
       } finally {
@@ -699,6 +665,86 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [createArtifact, createMarkdownNote, saveCurrentFile])
 
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const data = event.data as
+        | {
+            source?: string
+            type?: string
+            relativePath?: string
+            href?: string
+            key?: string
+            shiftKey?: boolean
+          }
+        | null
+      if (!data || data.source !== 'atelier-preview') {
+        return
+      }
+
+      if (data.type === 'shortcut') {
+        // Keyboard shortcuts fired from inside the preview iframe. Validate the
+        // key strictly and mirror the window-level keydown handler's actions.
+        const key = data.key
+        if (key !== 's' && key !== 'k' && key !== 'n') {
+          return
+        }
+        if (key === 's') {
+          void saveCurrentFile()
+        } else if (key === 'k') {
+          setPaletteOpen((open) => !open)
+        } else if (key === 'n') {
+          if (data.shiftKey === true) {
+            void createMarkdownNote()
+          } else {
+            void createArtifact()
+          }
+        }
+        return
+      }
+
+      if (data.type === 'navigate' && typeof data.relativePath === 'string') {
+        const target = data.relativePath
+        const files = activeVault?.index.files ?? []
+        const exact = files.find((file) => file.relativePath === target)
+        if (exact) {
+          void loadFile(exact.relativePath)
+        } else {
+          const targetBase = target.split('/').pop() ?? target
+          const targetStem = targetBase.replace(/\.[^.]+$/, '').toLowerCase()
+          const byBasename = files.find((file) => {
+            const base = file.relativePath.split('/').pop() ?? file.relativePath
+            const stem = base.replace(/\.[^.]+$/, '').toLowerCase()
+            return stem === targetStem
+          })
+          if (byBasename) {
+            void loadFile(byBasename.relativePath)
+          } else {
+            setStatus(`Not in vault: ${target}`)
+          }
+        }
+      } else if (data.type === 'open-external' && typeof data.href === 'string') {
+        void window.atelier.openExternal(data.href)
+      }
+    }
+
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [activeVault, loadFile, saveCurrentFile, createMarkdownNote, createArtifact])
+
+  const scrollToHeading = useCallback((index: number) => {
+    // The preview iframes are sandboxed without allow-same-origin, so they have
+    // an opaque origin; postMessage must target '*'. Only the mounted preview
+    // iframe carries the injected listener that reacts to 'atelier-host'
+    // messages, so broadcasting to every iframe is safe and avoids threading a
+    // ref down through Workspace.
+    document.querySelectorAll('iframe').forEach((frame) => {
+      frame.contentWindow?.postMessage(
+        { source: 'atelier-host', type: 'scroll-to-heading', index },
+        '*',
+      )
+    })
+  }, [])
+
   const copyPrompt = async (kind: 'create' | 'revise') => {
     if (!index) {
       return
@@ -856,6 +902,7 @@ function App() {
         collapsed={settings.inspectorCollapsed}
         onSelect={(path) => void loadFile(path)}
         onCopyPrompt={(kind) => void copyPrompt(kind)}
+        onScrollToHeading={scrollToHeading}
       />
 
       {shellDropTarget ? (

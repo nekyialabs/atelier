@@ -190,6 +190,32 @@ const NAVIGATION_SCRIPT = `<script>
       // Unresolvable, ignore
     }
   }, true);
+
+  // Forward app-level keyboard shortcuts that the iframe would otherwise
+  // swallow, so they behave the same whether focus is inside the preview or not.
+  document.addEventListener('keydown', function (event) {
+    if (!(event.ctrlKey || event.metaKey)) return;
+    var key = (event.key || '').toLowerCase();
+    if (key !== 's' && key !== 'k' && key !== 'n') return;
+    event.preventDefault();
+    window.parent.postMessage(
+      { source: 'atelier-preview', type: 'shortcut', key: key, shiftKey: event.shiftKey === true },
+      '*'
+    );
+  }, true);
+
+  // Respond to host-initiated commands (e.g. clicking an outline heading).
+  window.addEventListener('message', function (event) {
+    var data = event.data;
+    if (!data || data.source !== 'atelier-host') return;
+    if (data.type === 'scroll-to-heading' && typeof data.index === 'number') {
+      var headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      var target = headings[data.index];
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, false);
 })();
 </script>`
 

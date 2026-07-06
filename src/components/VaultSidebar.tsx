@@ -17,6 +17,7 @@ import {
 import { BrandMark } from './BrandMark'
 import { ContextMenu, type ContextMenuItem } from './ContextMenu'
 import type { VaultFile, VaultIndex } from '../shared/types'
+import { fuzzyScore } from '../lib/fuzzy'
 
 const VAULT_DRAG_MIME = 'application/x-atelier-file'
 const MARKDOWN_EXTENSIONS = new Set(['.md', '.markdown'])
@@ -579,11 +580,8 @@ function filterFiles(files: VaultFile[], query: string): VaultFile[] {
     )
   }
 
-  const normalizedQuery = trimmed.toLowerCase()
   return files.filter(
-    (file) =>
-      file.relativePath.toLowerCase().includes(normalizedQuery) ||
-      file.title.toLowerCase().includes(normalizedQuery),
+    (file) => fuzzyScore(file.relativePath, trimmed) > 0 || fuzzyScore(file.title, trimmed) > 0,
   )
 }
 

@@ -6,6 +6,7 @@ import {
   Search,
 } from 'lucide-react'
 import type { VaultIndex } from '../shared/types'
+import { fuzzyScore } from '../lib/fuzzy'
 
 export interface PaletteAction {
   id: string
@@ -211,18 +212,7 @@ function scoreItem(item: PaletteItem, query: string): number {
 
   let best = 0
   for (const hay of haystacks) {
-    if (hay === query) {
-      best = Math.max(best, 1000)
-      continue
-    }
-    if (hay.startsWith(query)) {
-      best = Math.max(best, 500)
-      continue
-    }
-    const idx = hay.indexOf(query)
-    if (idx >= 0) {
-      best = Math.max(best, 200 - idx)
-    }
+    best = Math.max(best, fuzzyScore(hay, query))
   }
 
   return best

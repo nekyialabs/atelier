@@ -287,10 +287,13 @@ export async function runCli(
       const result = await deleteFile(vaultPath, filePath)
       const payload = {
         removedPath: result.removedPath,
+        permanentlyDeleted: result.permanentlyDeleted ?? false,
         vault: summarizeIndex(result.index),
       }
-      return output('delete', vaultPath, payload, json, ({ removedPath }) =>
-        `Deleted ${removedPath}\n`,
+      return output('delete', vaultPath, payload, json, ({ removedPath, permanentlyDeleted }) =>
+        permanentlyDeleted
+          ? `Permanently deleted (system trash unavailable) ${removedPath}\n`
+          : `Deleted ${removedPath}\n`,
       )
     }
 

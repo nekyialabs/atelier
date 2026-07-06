@@ -102,6 +102,7 @@ export interface ImportFilesResult {
 export interface DeleteFileResult {
   removedPath: string
   index: VaultIndex
+  permanentlyDeleted?: boolean
 }
 
 export interface DuplicateFileResult {

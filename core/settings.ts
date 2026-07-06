@@ -14,11 +14,38 @@ export const DEFAULT_SETTINGS: AppSettings = {
 const WORKSPACE_MODES: WorkspaceMode[] = ['preview', 'split', 'source', 'graph', 'reading']
 const THEMES: Theme[] = ['dark', 'light']
 
+function isEnoent(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as NodeJS.ErrnoException).code === 'ENOENT'
+  )
+}
+
+/**
+ * Reads and normalizes the settings file. Returns null when the file does not
+ * exist (a fresh install, where defaults are the correct result). Throws on
+ * parse or permission errors so callers can decide whether to fall back to
+ * defaults (a read) or abort to avoid clobbering the file (a write).
+ */
+async function readSettingsRaw(settingsPath: string): Promise<AppSettings | null> {
+  let raw: string
+  try {
+    raw = await fs.readFile(settingsPath, 'utf8')
+  } catch (error) {
+    if (isEnoent(error)) {
+      return null
+    }
+    throw error
+  }
+  return normalizeSettings(JSON.parse(raw) as Partial<AppSettings>)
+}
+
 export async function readSettings(settingsPath: string): Promise<AppSettings> {
   try {
-    const raw = await fs.readFile(settingsPath, 'utf8')
-    return normalizeSettings(JSON.parse(raw) as Partial<AppSettings>)
-  } catch {
+    return (await readSettingsRaw(settingsPath)) ?? { ...DEFAULT_SETTINGS }
+  } catch (error) {
+    console.error(`Failed to read settings at ${settingsPath}:`, error)
     return { ...DEFAULT_SETTINGS }
   }
 }
@@ -31,7 +58,19 @@ export async function writeSettings(settingsPath: string, settings: AppSettings)
 }
 
 export async function updateSettings(settingsPath: string, update: AppSettingsUpdate): Promise<AppSettings> {
-  const current = await readSettings(settingsPath)
+  let current: AppSettings
+  try {
+    current = (await readSettingsRaw(settingsPath)) ?? { ...DEFAULT_SETTINGS }
+  } catch (error) {
+    // The settings file exists but could not be read (parse or permission
+    // error). Writing normalized defaults now would clobber the user's real
+    // settings, so abort the update rather than destroying the file.
+    console.error(
+      `Refusing to update settings; existing file is unreadable at ${settingsPath}:`,
+      error,
+    )
+    throw error
+  }
   return writeSettings(settingsPath, normalizeSettings({ ...current, ...update }))
 }
 
