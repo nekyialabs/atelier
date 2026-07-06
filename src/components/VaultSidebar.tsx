@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import {
   ChevronRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
   Copy,
   ExternalLink,
   FileCode2,
@@ -93,6 +95,32 @@ export function VaultSidebar({
   const [hoveredFolder, setHoveredFolder] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [renamingPath, setRenamingPath] = useState<string | null>(null)
+  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(() => new Set())
+
+  const toggleFolder = (folderPath: string) => {
+    setCollapsedFolders((prev) => {
+      const next = new Set(prev)
+      if (next.has(folderPath)) {
+        next.delete(folderPath)
+      } else {
+        next.add(folderPath)
+      }
+      return next
+    })
+  }
+
+  const expandAll = () => {
+    setCollapsedFolders(new Set())
+  }
+
+  const collapseAll = () => {
+    const allFolders = collectAllFolderPaths(tree)
+    setCollapsedFolders(allFolders)
+  }
+
+  // When a search query is active, force-expand everything so matches are visible.
+  const isSearchActive = query.trim().length > 0
+  const effectiveCollapsed = isSearchActive ? new Set<string>() : collapsedFolders
 
   const closeContextMenu = () => setContextMenu(null)
 
@@ -235,6 +263,15 @@ export function VaultSidebar({
         </button>
       </div>
 
+      <div className="tree-toolbar">
+        <button type="button" className="icon-button" title="Expand all folders" onClick={expandAll}>
+          <ChevronsUpDown size={14} />
+        </button>
+        <button type="button" className="icon-button" title="Collapse all folders" onClick={collapseAll}>
+          <ChevronsDownUp size={14} />
+        </button>
+      </div>
+
       <nav className="file-tree" onContextMenu={onTreeContext}>
         {tree.map((node) => (
           <TreeBranch
@@ -243,6 +280,8 @@ export function VaultSidebar({
             selectedPath={selectedPath}
             hoveredFolder={hoveredFolder}
             renamingPath={renamingPath}
+            collapsedFolders={effectiveCollapsed}
+            onToggleFolder={toggleFolder}
             onSelect={onSelect}
             onMoveFile={onMoveFile}
             onImportFiles={onImportFiles}
@@ -285,6 +324,8 @@ function TreeBranch({
   selectedPath,
   hoveredFolder,
   renamingPath,
+  collapsedFolders,
+  onToggleFolder,
   onSelect,
   onMoveFile,
   onImportFiles,
@@ -299,6 +340,8 @@ function TreeBranch({
   selectedPath: string
   hoveredFolder: string | null
   renamingPath: string | null
+  collapsedFolders: Set<string>
+  onToggleFolder: (folderPath: string) => void
   onSelect: (path: string) => void
   onMoveFile: (fromPath: string, toPath: string) => void
   onImportFiles: (sourcePaths: string[], targetDirectory?: string) => void
@@ -347,6 +390,7 @@ function TreeBranch({
 
   const folderPath = node.path
   const isHovered = hoveredFolder === folderPath
+  const isCollapsed = collapsedFolders.has(folderPath)
 
   const onDragEnter = (event: ReactDragEvent<HTMLDivElement>) => {
     if (!hasMoveOrFiles(event)) {
@@ -416,32 +460,39 @@ function TreeBranch({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <div
-        className="tree-folder-label"
+      <button
+        type="button"
+        className={`tree-folder-label ${isCollapsed ? 'collapsed' : 'expanded'}`}
         style={{ paddingLeft: `${depth * 14 + 10}px` }}
+        onClick={() => onToggleFolder(folderPath)}
         onContextMenu={(event) => onContextFolder(event, folderPath)}
+        aria-expanded={!isCollapsed}
       >
-        <ChevronRight size={13} />
+        <ChevronRight size={13} className="folder-chevron" />
         <span>{node.name}</span>
-      </div>
-      {node.children.map((child) => (
-        <TreeBranch
-          key={child.path}
-          node={child}
-          selectedPath={selectedPath}
-          hoveredFolder={hoveredFolder}
-          renamingPath={renamingPath}
-          onSelect={onSelect}
-          onMoveFile={onMoveFile}
-          onImportFiles={onImportFiles}
-          onHoverFolder={onHoverFolder}
-          onCommitRename={onCommitRename}
-          onCancelRename={onCancelRename}
-          onContextFile={onContextFile}
-          onContextFolder={onContextFolder}
-          depth={depth + 1}
-        />
-      ))}
+      </button>
+      {!isCollapsed
+        ? node.children.map((child) => (
+            <TreeBranch
+              key={child.path}
+              node={child}
+              selectedPath={selectedPath}
+              hoveredFolder={hoveredFolder}
+              renamingPath={renamingPath}
+              collapsedFolders={collapsedFolders}
+              onToggleFolder={onToggleFolder}
+              onSelect={onSelect}
+              onMoveFile={onMoveFile}
+              onImportFiles={onImportFiles}
+              onHoverFolder={onHoverFolder}
+              onCommitRename={onCommitRename}
+              onCancelRename={onCancelRename}
+              onContextFile={onContextFile}
+              onContextFolder={onContextFolder}
+              depth={depth + 1}
+            />
+          ))
+        : null}
     </div>
   )
 }
@@ -565,6 +616,22 @@ function buildTree(files: VaultFile[]): TreeNode[] {
 
   sortTree(root.children)
   return root.children
+}
+
+function collectAllFolderPaths(nodes: TreeNode[]): Set<string> {
+  const paths = new Set<string>()
+  const visit = (node: TreeNode) => {
+    if (!node.file) {
+      paths.add(node.path)
+      for (const child of node.children) {
+        visit(child)
+      }
+    }
+  }
+  for (const node of nodes) {
+    visit(node)
+  }
+  return paths
 }
 
 function sortTree(nodes: TreeNode[]): void {
