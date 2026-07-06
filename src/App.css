@@ -89,7 +89,7 @@
   font-weight: 400;
   letter-spacing: 0.04em;
   cursor: pointer;
-  transition: background-color 240ms ease, border-color 240ms ease, color 240ms ease;
+  transition: background-color var(--dur-slow) var(--ease), border-color var(--dur-slow) var(--ease), color var(--dur-slow) var(--ease);
 }
 
 .welcome-action svg {
@@ -149,7 +149,7 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .recent-list button:hover:not(:disabled) {
@@ -375,7 +375,7 @@
   border-radius: 8px;
   background: var(--field);
   color: var(--muted);
-  transition: background-color 150ms ease, box-shadow 150ms ease;
+  transition: background-color var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
 }
 
 .search-box:focus-within {
@@ -465,7 +465,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 
 .tree-folder-label:hover {
@@ -474,7 +474,7 @@
 }
 
 .tree-folder-label .folder-chevron {
-  transition: transform 120ms ease;
+  transition: transform var(--dur-base) var(--ease);
   flex-shrink: 0;
 }
 
@@ -486,7 +486,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 
 .tree-file svg {
@@ -683,7 +683,7 @@
   font: inherit;
   font-size: 14px;
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
 }
 
 .prompt-dialog input:focus {
@@ -709,7 +709,7 @@
   font-weight: 600;
   letter-spacing: -0.005em;
   cursor: pointer;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .dialog-secondary {
@@ -746,7 +746,7 @@
   display: grid;
   grid-template-columns: 200px 1fr;
   overflow: hidden;
-  animation: prompt-fade 120ms ease;
+  animation: prompt-fade var(--dur-base) var(--ease);
 }
 
 .settings-sidebar {
@@ -784,7 +784,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--dur-base) var(--ease);
 }
 
 .settings-tabs button:hover {
@@ -818,7 +818,7 @@
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background var(--dur-base) var(--ease), border-color var(--dur-base) var(--ease);
 }
 
 .vault-switcher-trigger:hover {
@@ -841,7 +841,7 @@
 }
 
 .vault-switcher-trigger svg {
-  transition: transform 120ms ease;
+  transition: transform var(--dur-base) var(--ease);
   flex-shrink: 0;
 }
 
@@ -861,7 +861,7 @@
   z-index: 10;
   max-height: 360px;
   overflow-y: auto;
-  animation: prompt-fade 100ms ease;
+  animation: prompt-fade var(--dur-fast) var(--ease);
 }
 
 .vault-switcher-section {
@@ -898,7 +898,7 @@
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 100ms ease;
+  transition: background var(--dur-fast) var(--ease);
 }
 
 .vault-switcher-item:hover {
@@ -935,7 +935,7 @@
   padding: 7px 10px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 100ms ease, color 100ms ease;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 
 .vault-switcher-action:hover {
@@ -1019,7 +1019,7 @@
   font: inherit;
   font-size: 13px;
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
 }
 
 .settings-row-stack .settings-row-control {
@@ -1059,7 +1059,7 @@ textarea.settings-row-control {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
 }
 
 .settings-segmented button:hover {
@@ -1175,7 +1175,7 @@ textarea.settings-row-control {
   padding: 9px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 80ms ease;
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 
 .palette-result.active {
@@ -1268,7 +1268,7 @@ textarea.settings-row-control {
   font: inherit;
   cursor: pointer;
   text-align: left;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .empty-actions button:hover {
@@ -1344,7 +1344,7 @@ textarea.settings-row-control {
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .properties-tag:hover {
@@ -1375,7 +1375,7 @@ textarea.settings-row-control {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
 }
 
 .properties-edit-trigger:hover {
@@ -1409,7 +1409,7 @@ textarea.settings-row-control {
   font: inherit;
   font-size: 12px;
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
 }
 
 .properties-tags-input:focus,
@@ -1428,7 +1428,7 @@ textarea.settings-row-control {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .properties-save {
@@ -1631,7 +1631,7 @@ textarea.settings-row-control {
   inset: 28px 2px;
   border-radius: 999px;
   background: var(--line-bright);
-  transition: background-color 150ms ease;
+  transition: background-color var(--dur-base) var(--ease);
 }
 
 .split-resizer:hover::before,
@@ -1680,7 +1680,7 @@ textarea.settings-row-control {
 .graph-pane line {
   stroke: var(--line-bright);
   stroke-width: 1.4;
-  transition: stroke 150ms ease;
+  transition: stroke var(--dur-base) var(--ease);
 }
 
 .graph-pane line.active-edge {
@@ -1696,7 +1696,7 @@ textarea.settings-row-control {
   fill: var(--panel-raised);
   stroke: var(--accent-soft);
   stroke-width: 2;
-  transition: fill 150ms ease, stroke 150ms ease;
+  transition: fill var(--dur-base) var(--ease), stroke var(--dur-base) var(--ease);
 }
 
 .graph-node:hover circle {
@@ -1952,4 +1952,110 @@ textarea.settings-row-control {
   font-size: 11px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Motion system — press-give, view-switch crossfade, skeleton, save pulse */
+/* ---------------------------------------------------------------------- */
+
+/* Press-give: every clickable surface gives slightly under the pointer.
+   Transform + shadow only — never layout properties. */
+.welcome-action:active:not(:disabled),
+.save-button:active:not(:disabled),
+.prompt-actions button:active:not(:disabled),
+.icon-button:active:not(:disabled),
+.rail-button:active,
+.tree-file:active,
+.tree-folder-label:active,
+.palette-result:active,
+.empty-actions button:active,
+.dialog-primary:active:not(:disabled),
+.dialog-secondary:active {
+  transform: scale(0.985) translateY(0.5px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22) inset;
+}
+
+/* View-switch crossfade: a freshly-mounted pane settles in rather than
+   snapping into place. Applied via key changes in Workspace.tsx so it only
+   plays when a pane genuinely (re)appears — never on ordinary re-renders. */
+@keyframes pane-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empty-workspace,
+.graph-pane,
+.reading-pane,
+.pane {
+  animation: pane-enter var(--dur-base) var(--ease);
+}
+
+/* Quiet skeleton — replaces the bare "Loading…" text at boot. */
+.loading-skeleton {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 180px;
+  margin: 6px auto 0;
+}
+
+.skeleton-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--field) 25%, var(--panel-raised) 50%, var(--field) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s var(--ease) infinite;
+}
+
+.skeleton-bar-a {
+  width: 100%;
+}
+
+.skeleton-bar-b {
+  width: 72%;
+  animation-delay: 0.15s;
+}
+
+.skeleton-bar-c {
+  width: 85%;
+  animation-delay: 0.3s;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Save pulse: a single soft accent-glow flash confirming Save → Saved. */
+@keyframes save-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+  45% {
+    box-shadow: 0 0 0 6px var(--accent-glow);
+  }
+  100% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+}
+
+.save-button.save-pulse {
+  animation: save-pulse var(--dur-slow) var(--ease);
+}
+
+/* Recurring signature — the wordmark mark, quiet, in the empty workspace. */
+.empty-workspace-mark {
+  margin-bottom: 16px;
+  color: var(--accent);
+  opacity: 0.32;
 }

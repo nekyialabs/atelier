@@ -91,6 +91,18 @@ export function Workspace({
   const [draftSplit, setDraftSplit] = useState(sourceSplit)
   const [resizing, setResizing] = useState(false)
   const splitContainerRef = useRef<HTMLElement | null>(null)
+  const [justSaved, setJustSaved] = useState(false)
+  const previousStatusRef = useRef(status)
+
+  useEffect(() => {
+    const changed = status !== previousStatusRef.current
+    previousStatusRef.current = status
+    if (changed && status.startsWith('Saved ')) {
+      setJustSaved(true)
+      const timeout = setTimeout(() => setJustSaved(false), 340)
+      return () => clearTimeout(timeout)
+    }
+  }, [status])
 
   const startResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (!splitContainerRef.current) {
@@ -171,7 +183,12 @@ export function Workspace({
           <button type="button" className="icon-button" title="Reload file" onClick={onReload}>
             <RefreshCcw size={16} />
           </button>
-          <button type="button" className="save-button" disabled={!dirty || busy} onClick={onSave}>
+          <button
+            type="button"
+            className={`save-button${justSaved ? ' save-pulse' : ''}`}
+            disabled={!dirty || busy}
+            onClick={onSave}
+          >
             <Save size={16} />
             <span>{dirty ? 'Save' : 'Saved'}</span>
           </button>
@@ -195,7 +212,7 @@ export function Workspace({
       ) : mode === 'graph' ? (
         <GraphView index={index} selectedPath={selectedPath} onSelect={onSelectFile} />
       ) : mode === 'reading' ? (
-        <section className="reading-pane">
+        <section className="reading-pane" key={`reading-${selectedPath}`}>
           {previewUrl ? (
             <iframe title="HTML reading view" src={previewUrl} sandbox="allow-scripts allow-forms" />
           ) : null}
@@ -203,6 +220,7 @@ export function Workspace({
       ) : (
         <section
           ref={splitContainerRef}
+          key="editor"
           className={`editor-preview-grid mode-${mode} ${resizing ? 'resizing' : ''}`}
         >
           {(mode === 'split' || mode === 'source') && (
@@ -247,6 +265,7 @@ export function Workspace({
 
           {(mode === 'split' || mode === 'preview') && (
             <div
+              key={selectedPath}
               className="pane preview-pane"
               style={mode === 'split' ? { flexBasis: `${100 - draftSplit}%` } : undefined}
             >

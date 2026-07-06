@@ -718,7 +718,12 @@ function App() {
       <main className="loading-shell">
         <BrandMark size={34} />
         <h1>Atelier</h1>
-        <p>Loading workspace</p>
+        <div className="loading-skeleton" aria-hidden="true">
+          <span className="skeleton-bar skeleton-bar-a" />
+          <span className="skeleton-bar skeleton-bar-b" />
+          <span className="skeleton-bar skeleton-bar-c" />
+        </div>
+        <p className="sr-only">Loading workspace</p>
       </main>
     )
   }
