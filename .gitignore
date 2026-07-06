@@ -34,3 +34,6 @@ release
 
 # OS
 Thumbs.db
+
+# Wrangler local state
+.wrangler
