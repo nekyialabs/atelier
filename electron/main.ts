@@ -1,5 +1,8 @@
 import { app, BrowserWindow, Menu, dialog, ipcMain, shell } from 'electron'
+import electronUpdater from 'electron-updater'
 import chokidar, { type FSWatcher } from 'chokidar'
+
+const { autoUpdater } = electronUpdater
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -491,9 +494,54 @@ ipcMain.handle('shell:open-external', async (_event, href: string): Promise<void
   }
 })
 
+function setupAutoUpdater(): void {
+  // Only packaged builds have update metadata; dev runs skip entirely.
+  if (!app.isPackaged) {
+    return
+  }
+
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('update-downloaded', (info) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    void dialog
+      .showMessageBox(win, {
+        type: 'info',
+        title: 'Update ready',
+        message: `Atelier ${info.version} is ready.`,
+        detail: 'Restart to apply, or it will install on next quit.',
+        buttons: ['Restart now', 'Later'],
+        defaultId: 0,
+        cancelId: 1,
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.quitAndInstall()
+        }
+      })
+  })
+
+  autoUpdater.on('error', (updateError) => {
+    // Never let update plumbing break the app — log and move on.
+    console.error('[auto-updater]', updateError?.message ?? updateError)
+  })
+
+  const check = () => {
+    autoUpdater.checkForUpdates().catch((checkError: unknown) => {
+      console.error('[auto-updater] check failed:', checkError)
+    })
+  }
+
+  // First check shortly after launch, then every 4 hours while running.
+  setTimeout(check, 15_000)
+  setInterval(check, 4 * 60 * 60 * 1000)
+}
+
 app.whenReady().then(async () => {
   await readAppSettings()
   await createWindow()
+  setupAutoUpdater()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
