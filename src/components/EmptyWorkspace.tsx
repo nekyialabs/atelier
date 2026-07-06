@@ -1,4 +1,5 @@
 import { FileCode2, FileText, FolderPlus, Sparkles } from 'lucide-react'
+import { BrandMark } from './BrandMark'
 
 export function EmptyWorkspace({
   vaultName,
@@ -14,6 +15,9 @@ export function EmptyWorkspace({
   return (
     <section className="empty-workspace">
       <div className="empty-workspace-inner">
+        <div className="empty-workspace-mark" aria-hidden="true">
+          <BrandMark size={22} />
+        </div>
         <p className="eyebrow">{vaultName}</p>
         <h2>Pick a file from the sidebar, or start something new.</h2>
         <p className="empty-hint">
