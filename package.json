@@ -8,10 +8,10 @@
   "homepage": "https://atelier.codependentai.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codependentai/atelier.git"
+    "url": "git+https://github.com/nekyialabs/atelier.git"
   },
   "bugs": {
-    "url": "https://github.com/codependentai/atelier/issues"
+    "url": "https://github.com/nekyialabs/atelier/issues"
   },
   "keywords": [
     "atelier",
